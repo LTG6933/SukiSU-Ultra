@@ -95,15 +95,15 @@ int __init kernelsu_init(void)
 #if defined(__x86_64__) && !defined(CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER)
     // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set
     if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
-        pr_alert("*************************************************************");
-        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-        pr_alert("**                                                         **");
-        pr_alert("**        X86_FEATURE_INDIRECT_SAFE is not enabled!        **");
-        pr_alert("**      KernelSU will abort initialization to prevent      **");
-        pr_alert("**                     kernel panic.                       **");
-        pr_alert("**                                                         **");
-        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-        pr_alert("*************************************************************");
+        // pr_alert("*************************************************************");
+        // pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+        // pr_alert("**                                                         **");
+        // pr_alert("**        X86_FEATURE_INDIRECT_SAFE is not enabled!        **");
+        // pr_alert("**      KernelSU will abort initialization to prevent      **");
+        // pr_alert("**                     kernel panic.                       **");
+        // pr_alert("**                                                         **");
+        // pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+        // pr_alert("*************************************************************");
         return -ENOSYS;
     }
 #endif
@@ -115,21 +115,21 @@ int __init kernelsu_init(void)
 #endif
 
 #ifdef CONFIG_KSU_DEBUG
-    pr_alert("*************************************************************");
-    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-    pr_alert("**                                                         **");
-    pr_alert("**         You are running KernelSU in DEBUG mode          **");
-    pr_alert("**                                                         **");
-    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-    pr_alert("*************************************************************");
+    // pr_alert("*************************************************************");
+    // pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+    // pr_alert("**                                                         **");
+    // pr_alert("**         You are running KernelSU in DEBUG mode          **");
+    // pr_alert("**                                                         **");
+    // pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+    // pr_alert("*************************************************************");
 #endif
     if (allow_shell) {
-        pr_alert("shell is allowed at init!");
+        // pr_alert("shell is allowed at init!");
     }
 
     ksu_cred = prepare_creds();
     if (!ksu_cred) {
-        pr_err("prepare cred failed!\n");
+        // pr_err("prepare cred failed!\n");
         return -ENOSYS;
     }
 
@@ -151,7 +151,7 @@ int __init kernelsu_init(void)
     ksu_app_profile_init();
 
     if (ksu_late_loaded) {
-        pr_info("late load mode, skipping kprobe hooks\n");
+        // pr_info("late load mode, skipping kprobe hooks\n");
 
         apply_kernelsu_rules();
         cache_sid();
@@ -175,7 +175,7 @@ int __init kernelsu_init(void)
         track_throne(false);
 
         if (!getenforce()) {
-            pr_info("Permissive SELinux, enforcing\n");
+            // pr_info("Permissive SELinux, enforcing\n");
             setenforce(true);
         }
 
