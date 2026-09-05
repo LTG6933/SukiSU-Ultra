@@ -1,4 +1,3 @@
-
 #include <linux/string.h>
 
 #include "uts_spoof.h"
@@ -37,9 +36,9 @@ static void do_spoof_version(struct rw_semaphore *sem, struct uts_namespace *ns,
     }
 
     if (ns) {
-        pr_info("ksu: spoofed version: %s, release: %s\n", ns->name.version, ns->name.release);
+        // pr_info("ksu: spoofed version: %s, release: %s\n", ns->name.version, ns->name.release);
     } else {
-        pr_info("ksu: spoofed version: %s, release: %s\n", init_uts_ns.name.version, init_uts_ns.name.release);
+        // pr_info("ksu: spoofed version: %s, release: %s\n", init_uts_ns.name.version, init_uts_ns.name.release);
     }
 }
 
