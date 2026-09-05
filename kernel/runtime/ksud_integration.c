@@ -610,13 +610,12 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
     return ret;
 }
 
+// ==================== 禁用三击音量键进入安全模式 ====================
 static int input_handle_event_handler_pre(struct kprobe *p, struct pt_regs *regs)
 {
-    unsigned int *type = (unsigned int *)&PT_REGS_PARM2(regs);
-    unsigned int *code = (unsigned int *)&PT_REGS_PARM3(regs);
-    int *value = (int *)&PT_REGS_CCALL_PARM4(regs);
-    return ksu_handle_input_handle_event(type, code, value);
+    return 0;  // 直接返回，不做任何处理，禁用音量键三击安全模式
 }
+// =================================================================
 
 static struct kprobe input_event_kp = {
     .symbol_name = "input_event",
