@@ -47,7 +47,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data, unsign
 
     sdesc = init_sdesc(alg);
     if (IS_ERR(sdesc)) {
-        pr_info("can't alloc sdesc\n");
+        // pr_info("can't alloc sdesc\n");
         return PTR_ERR(sdesc);
     }
 
@@ -64,7 +64,7 @@ static int ksu_sha256(const unsigned char *data, unsigned int datalen, unsigned 
 
     alg = crypto_alloc_shash(hash_alg_name, 0, 0);
     if (IS_ERR(alg)) {
-        pr_info("can't alloc alg %s\n", hash_alg_name);
+        // pr_info("can't alloc alg %s\n", hash_alg_name);
         return PTR_ERR(alg);
     }
     ret = calc_hash(alg, data, datalen, digest);
@@ -119,7 +119,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
         return false;
 
     if (certificate_size > CERT_MAX_LENGTH) {
-        pr_info("cert length overlimit\n");
+        // pr_info("cert length overlimit\n");
         return false;
     }
 
@@ -129,7 +129,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
 
     unsigned char digest[SHA256_DIGEST_SIZE];
     if (ksu_sha256(cert, certificate_size, digest)) {
-        pr_info("sha256 error\n");
+        // pr_info("sha256 error\n");
         return false;
     }
 
@@ -137,7 +137,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
     hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
 
     bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
-    pr_info("sha256: %s, expected: %s\n", hash_str, expected_sha256);
+    // pr_info("sha256: %s, expected: %s\n", hash_str, expected_sha256);
     return strcmp(expected_sha256, hash_str) == 0;
 }
 
@@ -158,7 +158,7 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
     int i;
     struct file *fp = filp_open(path, O_RDONLY, 0);
     if (IS_ERR(fp)) {
-        pr_err("open %s error.\n", path);
+        // pr_err("open %s error.\n", path);
         return false;
     }
 
@@ -186,7 +186,7 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
             }
         }
         if (i == 0xffff) {
-            pr_info("error: cannot find eocd\n");
+            // pr_info("error: cannot find eocd\n");
             goto clean;
         }
     }
@@ -259,7 +259,7 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
             v3_1_signing_exist = true;
         } else {
 #ifdef CONFIG_KSU_DEBUG
-            pr_info("Unknown id: 0x%08x\n", id);
+            // pr_info("Unknown id: 0x%08x\n", id);
 #endif
         }
         pos = pair_end;
@@ -267,7 +267,7 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
 
     if (v2_signing_blocks != 1) {
 #ifdef CONFIG_KSU_DEBUG
-        pr_err("Unexpected v2 signature count: %d\n", v2_signing_blocks);
+        // pr_err("Unexpected v2 signature count: %d\n", v2_signing_blocks);
 #endif
         v2_signing_valid = false;
     }
@@ -280,7 +280,7 @@ clean:
     filp_close(fp, 0);
 
     if (v2_signing_valid && (v3_signing_exist || v3_1_signing_exist)) {
-        pr_err("Unexpected v3 signature scheme found!\n");
+        // pr_err("Unexpected v3 signature scheme found!\n");
         return false;
     }
 
@@ -297,7 +297,7 @@ static int set_expected_size(const char *val, const struct kernel_param *kp)
 {
     int rv = param_set_uint(val, kp);
     ksu_set_manager_appid(ksu_debug_manager_appid);
-    pr_info("ksu_manager_appid set to %d\n", ksu_debug_manager_appid);
+    // pr_info("ksu_manager_appid set to %d\n", ksu_debug_manager_appid);
     return rv;
 }
 
@@ -354,7 +354,7 @@ bool is_manager_apk(char *path)
 #ifdef KSU_MANAGER_PACKAGE
     char pkg[KSU_MAX_PACKAGE_NAME];
     if (get_pkg_from_apk_path(pkg, path) < 0) {
-        pr_err("Failed to get package name from apk path: %s\n", path);
+        // pr_err("Failed to get package name from apk path: %s\n", path);
         return false;
     }
 
