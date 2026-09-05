@@ -30,7 +30,7 @@ static int kernel_umount_feature_set(u64 value)
 {
     bool enable = value != 0;
     ksu_kernel_umount_enabled = enable;
-    pr_info("kernel_umount: set to %d\n", enable);
+    // pr_info("kernel_umount: set to %d\n", enable);
     return 0;
 }
 
@@ -47,7 +47,7 @@ static void ksu_umount_mnt(const char *mnt, struct path *path, int flags)
 {
     int err = path_umount(path, flags);
     if (err) {
-        pr_info("umount %s failed: %d\n", mnt, err);
+        // pr_info("umount %s failed: %d\n", mnt, err);
     }
 }
 
@@ -104,18 +104,18 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     // also handle case 4 and 5
     bool is_zygote_child = is_zygote(current_cred());
     if (!is_zygote_child) {
-        pr_info("handle umount ignore non zygote child: %d\n", current->pid);
+        // pr_info("handle umount ignore non zygote child: %d\n", current->pid);
         return 0;
     }
     // umount the target mnt
-    pr_info("handle umount for uid: %d, pid: %d\n", new_uid, current->pid);
+    // pr_info("handle umount for uid: %d, pid: %d\n", new_uid, current->pid);
 
     const struct cred *saved = override_creds(ksu_cred);
 
     struct mount_entry *entry;
     down_read(&mount_list_lock);
     list_for_each_entry (entry, &mount_list, list) {
-        pr_info("%s: unmounting: %s flags: 0x%x\n", __func__, entry->umountable, entry->flags);
+        // pr_info("%s: unmounting: %s flags: 0x%x\n", __func__, entry->umountable, entry->flags);
         try_umount(entry->umountable, entry->flags);
     }
     up_read(&mount_list_lock);
@@ -128,7 +128,7 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 void __init ksu_kernel_umount_init(void)
 {
     if (ksu_register_feature_handler(&kernel_umount_handler)) {
-        pr_err("Failed to register kernel_umount feature handler\n");
+        // pr_err("Failed to register kernel_umount feature handler\n");
     }
 }
 
