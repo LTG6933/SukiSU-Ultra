@@ -42,7 +42,7 @@ static int su_compat_feature_set(u64 value)
 {
     bool enable = value != 0;
     ksu_su_compat_enabled = enable;
-    pr_info("su_compat: set to %d\n", enable);
+    // pr_info("su_compat: set to %d\n", enable);
     return 0;
 }
 
@@ -106,7 +106,7 @@ long ksu_handle_faccessat_sucompat(int orig_nr, struct pt_regs *regs)
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
         old_cred = override_creds(ksu_cred);
         if (is_ksud_exists()) {
-            pr_info("faccessat su->ksud!\n");
+            // pr_info("faccessat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
             ret = ksu_syscall_table[orig_nr](regs);
@@ -141,7 +141,7 @@ long ksu_handle_stat_sucompat(int orig_nr, struct pt_regs *regs)
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
         old_cred = override_creds(ksu_cred);
         if (is_ksud_exists()) {
-            pr_info("newfstatat su->ksud!\n");
+            // pr_info("newfstatat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
             ret = ksu_syscall_table[orig_nr](regs);
@@ -186,18 +186,18 @@ static long ksu_handle_execve_sucompat_common(const char __user **filename_user,
     ret = strncpy_from_user(path, fn, sizeof(path));
 
     if (ret < 0) {
-        pr_warn("Access filename when execve failed: %ld", ret);
+        // pr_warn("Access filename when execve failed: %ld", ret);
         goto do_orig_execve;
     }
 
     if (likely(memcmp(path, su_path, sizeof(su_path))))
         goto do_orig_execve;
 
-    pr_info("sys_execve su found\n");
+    // pr_info("sys_execve su found\n");
 
     tmp_fd = get_unused_fd_flags(O_CLOEXEC);
     if (tmp_fd < 0) {
-        pr_err("alloc tmp fd err: %d\n", tmp_fd);
+        // pr_err("alloc tmp fd err: %d\n", tmp_fd);
         goto do_orig_execve;
     }
 
@@ -205,7 +205,7 @@ static long ksu_handle_execve_sucompat_common(const char __user **filename_user,
     ksud_file = filp_open(KSUD_PATH, O_PATH, 0);
     revert_creds(old_cred);
     if (IS_ERR(ksud_file)) {
-        pr_err("open ksud err: %ld\n", PTR_ERR(ksud_file));
+        // pr_err("open ksud err: %ld\n", PTR_ERR(ksud_file));
         put_unused_fd(tmp_fd);
         goto do_orig_execve;
     }
@@ -228,7 +228,7 @@ static long ksu_handle_execve_sucompat_common(const char __user **filename_user,
 
     ret = escape_with_root_profile();
     if (ret) {
-        pr_err("escape_with_root_profile failed: %ld\n", ret);
+        // pr_err("escape_with_root_profile failed: %ld\n", ret);
     }
     ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
 
@@ -263,7 +263,7 @@ long ksu_handle_execveat_sucompat(const char __user **filename_user, int orig_nr
 void __init ksu_sucompat_init()
 {
     if (ksu_register_feature_handler(&su_compat_handler)) {
-        pr_err("Failed to register su_compat feature handler\n");
+        // pr_err("Failed to register su_compat feature handler\n");
     }
 }
 
