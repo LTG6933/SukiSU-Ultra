@@ -25,7 +25,7 @@ struct ksu_install_fd_tw {
 
 static int anon_ksu_release(struct inode *inode, struct file *filp)
 {
-    pr_info("ksu fd released\n");
+    // pr_info("ksu fd released\n");
     return 0;
 }
 
@@ -48,19 +48,19 @@ int ksu_install_fd(void)
 
     fd = get_unused_fd_flags(O_CLOEXEC);
     if (fd < 0) {
-        pr_err("ksu_install_fd: failed to get unused fd\n");
+        // pr_err("ksu_install_fd: failed to get unused fd\n");
         return fd;
     }
 
     filp = anon_inode_getfile("[ksu_driver]", &anon_ksu_fops, NULL, O_RDWR | O_CLOEXEC);
     if (IS_ERR(filp)) {
-        pr_err("ksu_install_fd: failed to create anon inode file\n");
+        // pr_err("ksu_install_fd: failed to create anon inode file\n");
         put_unused_fd(fd);
         return PTR_ERR(filp);
     }
 
     fd_install(fd, filp);
-    pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
+    // pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
     return fd;
 }
 
@@ -69,9 +69,9 @@ static void ksu_install_fd_tw_func(struct callback_head *cb)
     struct ksu_install_fd_tw *tw = container_of(cb, struct ksu_install_fd_tw, cb);
     int fd = ksu_install_fd();
 
-    pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
+    // pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
     if (copy_to_user(tw->outp, &fd, sizeof(fd))) {
-        pr_err("install ksu fd reply err\n");
+        // pr_err("install ksu fd reply err\n");
         ksu_close_fd(fd);
     }
 
@@ -97,7 +97,7 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
 
         if (task_work_add(current, &tw->cb, TWA_RESUME)) {
             kfree(tw);
-            pr_warn("install fd add task_work failed\n");
+            // pr_warn("install fd add task_work failed\n");
         }
     }
 
@@ -117,9 +117,9 @@ void __init ksu_supercalls_init(void)
 
     rc = register_kprobe(&reboot_kp);
     if (rc) {
-        pr_err("reboot kprobe failed: %d\n", rc);
+        // pr_err("reboot kprobe failed: %d\n", rc);
     } else {
-        pr_info("reboot kprobe registered successfully\n");
+        // pr_info("reboot kprobe registered successfully\n");
     }
 }
 
