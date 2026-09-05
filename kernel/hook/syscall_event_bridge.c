@@ -37,11 +37,11 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 
     path[sizeof(path) - 1] = '\0';
     if (unlikely(strcmp(path, KSUD_PATH) == 0)) {
-        pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
+        // pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
         escape_to_root_for_init();
     } else if (likely(strstr(path, "/app_process") == NULL && strstr(path, "/adbd") == NULL &&
                       strstr(path, "/stub_zygote") == NULL)) {
-        pr_info("hook_manager: unmark %d exec %s\n", current->pid, path);
+        // pr_info("hook_manager: unmark %d exec %s\n", current->pid, path);
         ksu_clear_task_tracepoint_flag_if_needed(current);
     }
 
@@ -97,7 +97,7 @@ static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *re
         ret = execveat ? ksu_adb_root_handle_execveat((struct pt_regs *)regs) :
                          ksu_adb_root_handle_execve((struct pt_regs *)regs);
         if (ret) {
-            pr_err("adb root failed: %ld\n", ret);
+            // pr_err("adb root failed: %ld\n", ret);
         }
     } else if (ksu_su_compat_enabled) {
         ret = execveat ? ksu_handle_execveat_sucompat(filename_user, orig_nr, (struct pt_regs *)regs) :
