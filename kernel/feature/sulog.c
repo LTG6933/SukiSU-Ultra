@@ -20,7 +20,7 @@ static int sulog_feature_set(u64 value)
     bool enable = value != 0;
 
     ksu_sulog_enabled = enable;
-    pr_info("sulog: set to %d\n", enable);
+    // pr_info("sulog: set to %d\n", enable);
     return 0;
 }
 
@@ -44,13 +44,13 @@ void __init ksu_sulog_init(void)
 
     ret = ksu_register_feature_handler(&sulog_handler);
     if (ret) {
-        pr_err("Failed to register sulog feature handler\n");
+        // pr_err("Failed to register sulog feature handler\n");
         return;
     }
 
     ret = ksu_sulog_events_init();
     if (ret) {
-        pr_err("Failed to initialize sulog events: %d\n", ret);
+        // pr_err("Failed to initialize sulog events: %d\n", ret);
         ksu_unregister_feature_handler(KSU_FEATURE_SULOG);
         return;
     }
