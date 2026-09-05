@@ -19,12 +19,12 @@ void on_post_fs_data(void)
     static bool done = false;
 
     if (done) {
-        pr_info("on_post_fs_data already done\n");
+        // pr_info("on_post_fs_data already done\n");
         return;
     }
 
     done = true;
-    pr_info("on_post_fs_data!\n");
+    // pr_info("on_post_fs_data!\n");
 
     ksu_load_allow_list();
     ksu_observer_init();
@@ -41,12 +41,12 @@ int nuke_ext4_sysfs(const char *mnt)
     int err = kern_path(mnt, 0, &path);
 
     if (err) {
-        pr_err("nuke path err: %d\n", err);
+        // pr_err("nuke path err: %d\n", err);
         return err;
     }
 
     if (strcmp(path.dentry->d_inode->i_sb->s_type->name, "ext4") != 0) {
-        pr_info("nuke but module aren't mounted\n");
+        // pr_info("nuke but module aren't mounted\n");
         path_put(&path);
         return -EINVAL;
     }
@@ -58,14 +58,14 @@ int nuke_ext4_sysfs(const char *mnt)
 
 void on_module_mounted(void)
 {
-    pr_info("on_module_mounted!\n");
+    // pr_info("on_module_mounted!\n");
     ksu_module_mounted = true;
 }
 
 void on_boot_completed(void)
 {
     ksu_boot_completed = true;
-    pr_info("on_boot_completed!\n");
+    // pr_info("on_boot_completed!\n");
     track_throne(true);
     ksu_selinux_hide_drop_backup_if_unused();
 }
