@@ -30,7 +30,7 @@ static struct group_info root_groups = { .usage = ATOMIC_INIT(2) };
 void setup_groups(struct root_profile *profile, struct cred *cred)
 {
     if (profile->groups_count > KSU_MAX_GROUPS) {
-        pr_warn("Failed to setgroups, too large group: %d!\n", profile->uid);
+        // pr_warn("Failed to setgroups, too large group: %d!\n", profile->uid);
         return;
     }
 
@@ -45,7 +45,7 @@ void setup_groups(struct root_profile *profile, struct cred *cred)
     u32 ngroups = profile->groups_count;
     struct group_info *group_info = groups_alloc(ngroups);
     if (!group_info) {
-        pr_warn("Failed to setgroups, ENOMEM for: %d\n", profile->uid);
+        // pr_warn("Failed to setgroups, ENOMEM for: %d\n", profile->uid);
         return;
     }
 
@@ -54,7 +54,7 @@ void setup_groups(struct root_profile *profile, struct cred *cred)
         gid_t gid = profile->groups[i];
         kgid_t kgid = make_kgid(current_user_ns(), gid);
         if (!gid_valid(kgid)) {
-            pr_warn("Failed to setgroups, invalid gid: %d\n", gid);
+            // pr_warn("Failed to setgroups, invalid gid: %d\n", gid);
             put_group_info(group_info);
             return;
         }
@@ -85,7 +85,7 @@ static void disable_seccomp(void)
 
     fake = kmalloc(sizeof(*fake), GFP_KERNEL);
     if (!fake) {
-        pr_warn("failed to alloc fake task_struct\n");
+        // pr_warn("failed to alloc fake task_struct\n");
         return;
     }
 
@@ -135,17 +135,17 @@ int escape_with_root_profile(void)
 
     cred = prepare_creds();
     if (!cred) {
-        pr_warn("prepare_creds failed!\n");
+        // pr_warn("prepare_creds failed!\n");
         return -ENOMEM;
     }
 
     if (cred->euid.val == 0) {
-        pr_warn("Already root, don't escape!\n");
+        // pr_warn("Already root, don't escape!\n");
         goto out_abort_creds;
     }
 
     if (test_thread_flag(TIF_KSU_DISABLE_ESCAPE_WITH_ROOT)) {
-        pr_warn("TIF_KSU_DISABLE_ESCAPE_WITH_ROOT found, don't escape!\n");
+        // pr_warn("TIF_KSU_DISABLE_ESCAPE_WITH_ROOT found, don't escape!\n");
         goto out_abort_creds;
     }
 
@@ -227,7 +227,7 @@ void escape_to_root_for_init(void)
 {
     struct cred *cred = prepare_creds();
     if (!cred) {
-        pr_err("Failed to prepare init's creds!\n");
+        // pr_err("Failed to prepare init's creds!\n");
         return;
     }
 
@@ -244,10 +244,10 @@ void __init ksu_app_profile_init(void)
     void *seccomp_filter_release_sym = find_kernel_symbol_exact("seccomp_filter_release");
     ret = kallsyms_lookup_size_offset(seccomp_filter_release_sym, &size, NULL);
     if (!ret || !size) {
-        pr_err("failed to get size of seccomp_filter_release: %d, use 128\n", ret);
+        // pr_err("failed to get size of seccomp_filter_release: %d, use 128\n", ret);
         size = 128;
     }
     has_call_to_spin_lock = scan_call_to(seccomp_filter_release_sym, size, raw_spin_lock_irq_sym) != NULL;
-    pr_info("seccomp_filter_release has_call_to_spin_lock = %d\n", has_call_to_spin_lock);
+    // pr_info("seccomp_filter_release has_call_to_spin_lock = %d\n", has_call_to_spin_lock);
 #endif
 }
