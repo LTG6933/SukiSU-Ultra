@@ -55,9 +55,9 @@ noinline NO_OPTIMIZE void sukisu_kpm_load_module_path(const char *path,
                                                       const char *args,
                                                       void *ptr, int *result)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_load_module_path). "
-            "path=%s args=%s ptr=%p\n",
-            path, args, ptr);
+    // pr_info("kpm: Stub function called (sukisu_kpm_load_module_path). "
+    //         "path=%s args=%s ptr=%p\n",
+    //         path, args, ptr);
 
     __asm__ volatile("nop");
 }
@@ -66,9 +66,9 @@ EXPORT_SYMBOL(sukisu_kpm_load_module_path);
 noinline NO_OPTIMIZE void sukisu_kpm_unload_module(const char *name, void *ptr,
                                                    int *result)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_unload_module). "
-            "name=%s ptr=%p\n",
-            name, ptr);
+    // pr_info("kpm: Stub function called (sukisu_kpm_unload_module). "
+    //         "name=%s ptr=%p\n",
+    //         name, ptr);
 
     __asm__ volatile("nop");
 }
@@ -76,7 +76,7 @@ EXPORT_SYMBOL(sukisu_kpm_unload_module);
 
 noinline NO_OPTIMIZE void sukisu_kpm_num(int *result)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_num).\n");
+    // pr_info("kpm: Stub function called (sukisu_kpm_num).\n");
 
     __asm__ volatile("nop");
 }
@@ -85,9 +85,9 @@ EXPORT_SYMBOL(sukisu_kpm_num);
 noinline NO_OPTIMIZE void sukisu_kpm_info(const char *name, char *buf,
                                           int bufferSize, int *size)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_info). "
-            "name=%s buffer=%p\n",
-            name, buf);
+    // pr_info("kpm: Stub function called (sukisu_kpm_info). "
+    //         "name=%s buffer=%p\n",
+    //         name, buf);
 
     __asm__ volatile("nop");
 }
@@ -96,18 +96,18 @@ EXPORT_SYMBOL(sukisu_kpm_info);
 noinline NO_OPTIMIZE void sukisu_kpm_list(void *out, int bufferSize,
                                           int *result)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_list). "
-            "buffer=%p size=%d\n",
-            out, bufferSize);
+    // pr_info("kpm: Stub function called (sukisu_kpm_list). "
+    //         "buffer=%p size=%d\n",
+    //         out, bufferSize);
 }
 EXPORT_SYMBOL(sukisu_kpm_list);
 
 noinline NO_OPTIMIZE void sukisu_kpm_control(const char *name, const char *args,
                                              long arg_len, int *result)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_control). "
-            "name=%p args=%p arg_len=%ld\n",
-            name, args, arg_len);
+    // pr_info("kpm: Stub function called (sukisu_kpm_control). "
+    //         "name=%p args=%p arg_len=%ld\n",
+    //         name, args, arg_len);
 
     __asm__ volatile("nop");
 }
@@ -115,9 +115,9 @@ EXPORT_SYMBOL(sukisu_kpm_control);
 
 noinline NO_OPTIMIZE void sukisu_kpm_version(char *buf, int bufferSize)
 {
-    pr_info("kpm: Stub function called (sukisu_kpm_version). "
-            "buffer=%p\n",
-            buf);
+    // pr_info("kpm: Stub function called (sukisu_kpm_version). "
+    //         "buffer=%p\n",
+    //         buf);
 }
 EXPORT_SYMBOL(sukisu_kpm_version);
 
@@ -218,7 +218,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1,
         }
 
         if (copy_to_user(arg1, &buf, len) != 0)
-            pr_info("kpm: Copy to user failed.");
+            // pr_info("kpm: Copy to user failed.");
 
     } else if (control_code == SUKISU_KPM_CONTROL) {
         char kpm_name[KPM_NAME_LEN] = { 0 };
@@ -260,12 +260,12 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1,
 
 exit:
     if (copy_to_user(result_code, &res, sizeof(res)) != 0)
-        pr_info("kpm: Copy to user failed.");
+        // pr_info("kpm: Copy to user failed.");
 
     return 0;
 invalid_arg:
-    pr_err("kpm: invalid pointer detected! arg1: %px arg2: %px\n", (void *)arg1,
-           (void *)arg2);
+    // pr_err("kpm: invalid pointer detected! arg1: %px arg2: %px\n", (void *)arg1,
+    //        (void *)arg2);
     res = -EFAULT;
     goto exit;
 }
@@ -284,19 +284,19 @@ int do_kpm(void __user *arg)
     struct ksu_kpm_cmd cmd;
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
-        pr_err("kpm: copy_from_user failed\n");
+        // pr_err("kpm: copy_from_user failed\n");
         return -EFAULT;
     }
 
     if (!access_ok(cmd.control_code, sizeof(int))) {
-        pr_err("kpm: invalid control_code pointer %px\n",
-               (void *)cmd.control_code);
+        // pr_err("kpm: invalid control_code pointer %px\n",
+        //        (void *)cmd.control_code);
         return -EFAULT;
     }
 
     if (!access_ok(cmd.result_code, sizeof(int))) {
-        pr_err("kpm: invalid result_code pointer %px\n",
-               (void *)cmd.result_code);
+        // pr_err("kpm: invalid result_code pointer %px\n",
+        //        (void *)cmd.result_code);
         return -EFAULT;
     }
 
