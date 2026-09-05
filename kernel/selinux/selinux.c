@@ -34,12 +34,12 @@ static int transive_to_domain(const char *domain, struct cred *cred, bool clear_
 #endif
     tsec = selinux_cred(cred);
     if (!tsec) {
-        pr_err("tsec == NULL!\n");
+        // pr_err("tsec == NULL!\n");
         return -1;
     }
     error = security_secctx_to_secid(domain, strlen(domain), &sid);
     if (error) {
-        pr_info("security_secctx_to_secid %s -> sid: %d, error: %d\n", domain, sid, error);
+        // pr_info("security_secctx_to_secid %s -> sid: %d, error: %d\n", domain, sid, error);
     }
     if (!error) {
         tsec->sid = sid;
@@ -56,7 +56,7 @@ static int transive_to_domain(const char *domain, struct cred *cred, bool clear_
 void setup_selinux(const char *domain, struct cred *cred)
 {
     if (transive_to_domain(domain, cred, false)) {
-        pr_err("transive domain failed.\n");
+        // pr_err("transive domain failed.\n");
         return;
     }
 }
@@ -64,7 +64,7 @@ void setup_selinux(const char *domain, struct cred *cred)
 void setup_ksu_cred(void)
 {
     if (transive_to_domain(KERNEL_SU_CONTEXT, ksu_cred, false)) {
-        pr_err("setup ksu cred failed.\n");
+        // pr_err("setup ksu cred failed.\n");
     }
 }
 
@@ -120,34 +120,34 @@ void cache_sid(void)
 
     err = security_secctx_to_secid(KERNEL_SU_CONTEXT, strlen(KERNEL_SU_CONTEXT), &cached_su_sid);
     if (err) {
-        pr_warn("Failed to cache kernel su domain SID: %d\n", err);
+        // pr_warn("Failed to cache kernel su domain SID: %d\n", err);
         cached_su_sid = 0;
     } else {
-        pr_info("Cached su SID: %u\n", cached_su_sid);
+        // pr_info("Cached su SID: %u\n", cached_su_sid);
     }
 
     err = security_secctx_to_secid(ZYGOTE_CONTEXT, strlen(ZYGOTE_CONTEXT), &cached_zygote_sid);
     if (err) {
-        pr_warn("Failed to cache zygote SID: %d\n", err);
+        // pr_warn("Failed to cache zygote SID: %d\n", err);
         cached_zygote_sid = 0;
     } else {
-        pr_info("Cached zygote SID: %u\n", cached_zygote_sid);
+        // pr_info("Cached zygote SID: %u\n", cached_zygote_sid);
     }
 
     err = security_secctx_to_secid(INIT_CONTEXT, strlen(INIT_CONTEXT), &cached_init_sid);
     if (err) {
-        pr_warn("Failed to cache init SID: %d\n", err);
+        // pr_warn("Failed to cache init SID: %d\n", err);
         cached_init_sid = 0;
     } else {
-        pr_info("Cached init SID: %u\n", cached_init_sid);
+        // pr_info("Cached init SID: %u\n", cached_init_sid);
     }
 
     err = security_secctx_to_secid(KSU_FILE_CONTEXT, strlen(KSU_FILE_CONTEXT), &ksu_file_sid);
     if (err) {
-        pr_warn("Failed to cache ksu_file SID: %d\n", err);
+        // pr_warn("Failed to cache ksu_file SID: %d\n", err);
         ksu_file_sid = 0;
     } else {
-        pr_info("Cached ksu_file SID: %u\n", ksu_file_sid);
+        // pr_info("Cached ksu_file SID: %u\n", ksu_file_sid);
     }
 }
 
@@ -209,12 +209,12 @@ void escape_to_root_for_adb_root(void)
 {
     struct cred *cred = prepare_creds();
     if (!cred) {
-        pr_err("Failed to prepare adbd's creds!\n");
+        // pr_err("Failed to prepare adbd's creds!\n");
         return;
     }
 
     if (transive_to_domain(KERNEL_SU_CONTEXT, cred, true)) {
-        pr_err("transive domain failed.\n");
+        // pr_err("transive domain failed.\n");
         abort_creds(cred);
         return;
     }
