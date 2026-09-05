@@ -200,7 +200,7 @@ static bool add_rule(struct policydb *db, const char *s, const char *t, const ch
     if (s) {
         src = symtab_search(&db->p_types, s);
         if (src == NULL) {
-            pr_info("source type %s does not exist\n", s);
+            // pr_info("source type %s does not exist\n", s);
             return false;
         }
     }
@@ -208,7 +208,7 @@ static bool add_rule(struct policydb *db, const char *s, const char *t, const ch
     if (t) {
         tgt = symtab_search(&db->p_types, t);
         if (tgt == NULL) {
-            pr_info("target type %s does not exist\n", t);
+            // pr_info("target type %s does not exist\n", t);
             return false;
         }
     }
@@ -216,14 +216,14 @@ static bool add_rule(struct policydb *db, const char *s, const char *t, const ch
     if (c) {
         cls = symtab_search(&db->p_classes, c);
         if (cls == NULL) {
-            pr_info("class %s does not exist\n", c);
+            // pr_info("class %s does not exist\n", c);
             return false;
         }
     }
 
     if (p) {
         if (c == NULL) {
-            pr_info("No class is specified, cannot add perm [%s] \n", p);
+            // pr_info("No class is specified, cannot add perm [%s] \n", p);
             return false;
         }
 
@@ -232,7 +232,7 @@ static bool add_rule(struct policydb *db, const char *s, const char *t, const ch
             perm = symtab_search(&cls->comdatum->permissions, p);
         }
         if (perm == NULL) {
-            pr_info("perm %s does not exist in class %s\n", p, c);
+            // pr_info("perm %s does not exist in class %s\n", p, c);
             return false;
         }
     }
@@ -391,7 +391,7 @@ static void add_xperm_rule_raw(struct policydb *db, struct type_datum *src, stru
 
         node = get_avtab_node(db, &key, &xperms);
         if (!node) {
-            pr_warn("add_xperm_rule_raw cannot found node!\n");
+            // pr_warn("add_xperm_rule_raw cannot found node!\n");
             return;
         }
         datum = &node->datum;
@@ -399,7 +399,7 @@ static void add_xperm_rule_raw(struct policydb *db, struct type_datum *src, stru
         if (datum->u.xperms == NULL) {
             datum->u.xperms = (struct avtab_extended_perms *)(kzalloc(sizeof(xperms), GFP_KERNEL));
             if (!datum->u.xperms) {
-                pr_err("alloc xperms failed\n");
+                // pr_err("alloc xperms failed\n");
                 return;
             }
             memcpy(datum->u.xperms, &xperms, sizeof(xperms));
@@ -416,7 +416,7 @@ static bool add_xperm_rule(struct policydb *db, const char *s, const char *t, co
     if (s) {
         src = symtab_search(&db->p_types, s);
         if (src == NULL) {
-            pr_info("source type %s does not exist\n", s);
+            // pr_info("source type %s does not exist\n", s);
             return false;
         }
     }
@@ -424,7 +424,7 @@ static bool add_xperm_rule(struct policydb *db, const char *s, const char *t, co
     if (t) {
         tgt = symtab_search(&db->p_types, t);
         if (tgt == NULL) {
-            pr_info("target type %s does not exist\n", t);
+            // pr_info("target type %s does not exist\n", t);
             return false;
         }
     }
@@ -432,7 +432,7 @@ static bool add_xperm_rule(struct policydb *db, const char *s, const char *t, co
     if (c) {
         cls = symtab_search(&db->p_classes, c);
         if (cls == NULL) {
-            pr_info("class %s does not exist\n", c);
+            // pr_info("class %s does not exist\n", c);
             return false;
         }
     }
@@ -462,22 +462,22 @@ static bool add_type_rule(struct policydb *db, const char *s, const char *t, con
 
     src = symtab_search(&db->p_types, s);
     if (src == NULL) {
-        pr_info("source type %s does not exist\n", s);
+        // pr_info("source type %s does not exist\n", s);
         return false;
     }
     tgt = symtab_search(&db->p_types, t);
     if (tgt == NULL) {
-        pr_info("target type %s does not exist\n", t);
+        // pr_info("target type %s does not exist\n", t);
         return false;
     }
     cls = symtab_search(&db->p_classes, c);
     if (cls == NULL) {
-        pr_info("class %s does not exist\n", c);
+        // pr_info("class %s does not exist\n", c);
         return false;
     }
     def = symtab_search(&db->p_types, d);
     if (def == NULL) {
-        pr_info("default type %s does not exist\n", d);
+        // pr_info("default type %s does not exist\n", d);
         return false;
     }
 
@@ -547,22 +547,22 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
 
     src = symtab_search(&db->p_types, s);
     if (src == NULL) {
-        pr_warn("source type %s does not exist\n", s);
+        // pr_warn("source type %s does not exist\n", s);
         return false;
     }
     tgt = symtab_search(&db->p_types, t);
     if (tgt == NULL) {
-        pr_warn("target type %s does not exist\n", t);
+        // pr_warn("target type %s does not exist\n", t);
         return false;
     }
     cls = symtab_search(&db->p_classes, c);
     if (cls == NULL) {
-        pr_warn("class %s does not exist\n", c);
+        // pr_warn("class %s does not exist\n", c);
         return false;
     }
     def = symtab_search(&db->p_types, d);
     if (def == NULL) {
-        pr_warn("default type %s does not exist\n", d);
+        // pr_warn("default type %s does not exist\n", d);
         return false;
     }
 
@@ -589,25 +589,25 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
     if (trans == NULL) {
         trans = (struct filename_trans_datum *)kcalloc(1, sizeof(*trans), GFP_KERNEL);
         if (!trans) {
-            pr_err("add_filename_trans: alloc filename_trans_datum failed\n");
+            // pr_err("add_filename_trans: alloc filename_trans_datum failed\n");
             goto out;
         }
         new_key = (struct filename_trans_key *)kzalloc(sizeof(*new_key), GFP_KERNEL);
         if (!new_key) {
-            pr_err("add_filename_trans: alloc filename_trans_key failed\n");
+            // pr_err("add_filename_trans: alloc filename_trans_key failed\n");
             goto free_trans;
         }
         *new_key = key;
         new_key->name = kstrdup(key.name, GFP_KERNEL);
         if (!new_key->name) {
-            pr_err("add_filename_trans: kstrdup name failed\n");
+            // pr_err("add_filename_trans: kstrdup name failed\n");
             goto free_key;
         }
         trans->next = last;
         trans->otype = def->value;
         rc = hashtab_insert(&db->filename_trans, new_key, trans, filenametr_key_params);
         if (rc) {
-            pr_err("add_filename_trans: hashtab_insert failed: %d\n", rc);
+            // pr_err("add_filename_trans: hashtab_insert failed: %d\n", rc);
             goto free_name;
         }
     }
@@ -659,14 +659,14 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 {
     struct type_datum *type = symtab_search(&db->p_types, type_name);
     if (type) {
-        pr_warn("Type %s already exists\n", type_name);
+        // pr_warn("Type %s already exists\n", type_name);
         return true;
     }
 
     u32 value = ++db->p_types.nprim;
     type = (struct type_datum *)kzalloc(sizeof(struct type_datum), GFP_KERNEL);
     if (!type) {
-        pr_err("add_type: alloc type_datum failed.\n");
+        // pr_err("add_type: alloc type_datum failed.\n");
         return false;
     }
 
@@ -676,12 +676,12 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 
     char *key = kstrdup(type_name, GFP_KERNEL);
     if (!key) {
-        pr_err("add_type: alloc key failed.\n");
+        // pr_err("add_type: alloc key failed.\n");
         return false;
     }
 
     if (symtab_insert(&db->p_types, key, type)) {
-        pr_err("add_type: insert symtab failed.\n");
+        // pr_err("add_type: insert symtab failed.\n");
         return false;
     }
 
@@ -689,7 +689,7 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
         ksu_kvrealloc(db->type_attr_map_array, value * sizeof(struct ebitmap), (value - 1) * sizeof(struct ebitmap));
 
     if (!new_type_attr_map_array) {
-        pr_err("add_type: alloc type_attr_map_array failed\n");
+        // pr_err("add_type: alloc type_attr_map_array failed\n");
         return false;
     }
 
@@ -697,14 +697,14 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
         db->type_val_to_struct, sizeof(*db->type_val_to_struct) * value, sizeof(*db->type_val_to_struct) * (value - 1));
 
     if (!new_type_val_to_struct) {
-        pr_err("add_type: alloc type_val_to_struct failed\n");
+        // pr_err("add_type: alloc type_val_to_struct failed\n");
         return false;
     }
 
     char **new_val_to_name_types =
         ksu_kvrealloc(db->sym_val_to_name[SYM_TYPES], sizeof(char *) * value, sizeof(char *) * (value - 1));
     if (!new_val_to_name_types) {
-        pr_err("add_type: alloc val_to_name failed\n");
+        // pr_err("add_type: alloc val_to_name failed\n");
         return false;
     }
 
@@ -735,16 +735,16 @@ static bool set_type_state(struct policydb *db, const char *type_name, bool perm
         {
             type = (struct type_datum *)(node->datum);
             if (ebitmap_set_bit(&db->permissive_map, type->value, permissive))
-                pr_info("Could not set bit in permissive map\n");
+                // pr_info("Could not set bit in permissive map\n");
         };
     } else {
         type = (struct type_datum *)symtab_search(&db->p_types, type_name);
         if (type == NULL) {
-            pr_info("type %s does not exist\n", type_name);
+            // pr_info("type %s does not exist\n", type_name);
             return false;
         }
         if (ebitmap_set_bit(&db->permissive_map, type->value, permissive)) {
-            pr_info("Could not set bit in permissive map\n");
+            // pr_info("Could not set bit in permissive map\n");
             return false;
         }
     }
@@ -776,19 +776,19 @@ static bool add_typeattribute(struct policydb *db, const char *type, const char 
 {
     struct type_datum *type_d = symtab_search(&db->p_types, type);
     if (type_d == NULL) {
-        pr_info("type %s does not exist\n", type);
+        // pr_info("type %s does not exist\n", type);
         return false;
     } else if (type_d->attribute) {
-        pr_info("type %s is an attribute\n", attr);
+        // pr_info("type %s is an attribute\n", attr);
         return false;
     }
 
     struct type_datum *attr_d = symtab_search(&db->p_types, attr);
     if (attr_d == NULL) {
-        pr_info("attribute %s does not exist\n", type);
+        // pr_info("attribute %s does not exist\n", type);
         return false;
     } else if (!attr_d->attribute) {
-        pr_info("type %s is not an attribute \n", attr);
+        // pr_info("type %s is not an attribute \n", attr);
         return false;
     }
 
@@ -911,7 +911,7 @@ struct selinux_policy *ksu_dup_sepolicy(struct selinux_policy *old_pol)
     len = old_pol->policydb.len;
     data = vmalloc(len);
     if (!data) {
-        pr_err("alloc policy len %ld\n", len);
+        // pr_err("alloc policy len %ld\n", len);
         ret = -ENOMEM;
         goto out_free_data;
     }
@@ -921,7 +921,7 @@ struct selinux_policy *ksu_dup_sepolicy(struct selinux_policy *old_pol)
 
     ret = policydb_write(&old_pol->policydb, &fp);
     if (ret) {
-        pr_err("sepolicy: policydb_write: %d\n", ret);
+        // pr_err("sepolicy: policydb_write: %d\n", ret);
         goto out_free_data;
     }
     // https://android.googlesource.com/kernel/common/+/35a7845718734ae638b85b420534cb859498dab6%5E%21
@@ -932,22 +932,22 @@ struct selinux_policy *ksu_dup_sepolicy(struct selinux_policy *old_pol)
     static const size_t kConfigOff = 20;
     if (len >= kConfigOff + sizeof(u32)) {
         u32 *config_ptr = (u32 *)((unsigned long)data + kConfigOff);
-        pr_info("old config: %u\n", *config_ptr);
+        // pr_info("old config: %u\n", *config_ptr);
         if (old_pol->policydb.android_netlink_route) {
-            pr_info("adding POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE\n");
+            // pr_info("adding POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE\n");
             *config_ptr |= POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE;
         }
         if (old_pol->policydb.android_netlink_getneigh) {
-            pr_info("adding POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH\n");
+            // pr_info("adding POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH\n");
             *config_ptr |= POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH;
         }
-        pr_info("new config: %u\n", *config_ptr);
+        // pr_info("new config: %u\n", *config_ptr);
     }
 #endif
     new_pol = kmemdup(old_pol, sizeof(*old_pol), GFP_KERNEL);
     if (!new_pol) {
         ret = -ENOMEM;
-        pr_err("sepolicy: dup old pol\n");
+        // pr_err("sepolicy: dup old pol\n");
         goto out_free_data;
     }
     memset(&new_pol->policydb, 0, sizeof(new_pol->policydb));
@@ -958,7 +958,7 @@ struct selinux_policy *ksu_dup_sepolicy(struct selinux_policy *old_pol)
 
     ret = policydb_read(&new_pol->policydb, &fp);
     if (ret) {
-        pr_err("sepolicy: policydb_read: %d\n", ret);
+        // pr_err("sepolicy: policydb_read: %d\n", ret);
         goto out_free_policydb;
     }
     new_pol->policydb.len = old_pol->policydb.len;
