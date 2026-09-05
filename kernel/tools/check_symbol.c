@@ -19,13 +19,13 @@ int open_elf(const char *path, ElfFile *elf)
 {
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
-        fprintf(stderr, "Error: Cannot open file %s\n", path);
+        // fprintf(stderr, "Error: Cannot open file %s\n", path);
         return -1;
     }
 
     struct stat st;
     if (fstat(fd, &st) < 0) {
-        fprintf(stderr, "Error: Cannot stat file %s\n", path);
+        // fprintf(stderr, "Error: Cannot stat file %s\n", path);
         close(fd);
         return -1;
     }
@@ -35,20 +35,20 @@ int open_elf(const char *path, ElfFile *elf)
     close(fd);
 
     if (elf->data == MAP_FAILED) {
-        fprintf(stderr, "Error: Cannot mmap file %s\n", path);
+        // fprintf(stderr, "Error: Cannot mmap file %s\n", path);
         return -1;
     }
 
     elf->ehdr = (Elf64_Ehdr *)elf->data;
 
     if (memcmp(elf->ehdr->e_ident, ELFMAG, SELFMAG) != 0) {
-        fprintf(stderr, "Error: %s is not a valid ELF file\n", path);
+        // fprintf(stderr, "Error: %s is not a valid ELF file\n", path);
         munmap(elf->data, elf->size);
         return -1;
     }
 
     if (elf->ehdr->e_ident[EI_CLASS] != ELFCLASS64) {
-        fprintf(stderr, "Error: %s is not a 64-bit ELF file\n", path);
+        // fprintf(stderr, "Error: %s is not a 64-bit ELF file\n", path);
         munmap(elf->data, elf->size);
         return -1;
     }
@@ -103,7 +103,7 @@ Elf64_Sym *find_symbol(ElfFile *elf, const char *name, Elf64_Shdr *symtab, char 
 int main(int argc, char *argv[])
 {
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s <ko_elf> <vmlinux>\n", argv[0]);
+        // fprintf(stderr, "Usage: %s <ko_elf> <vmlinux>\n", argv[0]);
         return 1;
     }
 
@@ -126,29 +126,29 @@ int main(int argc, char *argv[])
     Elf64_Shdr *ko_version_sec = find_section(&ko_elf, "__versions");
 
     if (!ko_symtab) {
-        fprintf(stderr, "Error: No symbol table found in %s\n", ko_path);
+        // fprintf(stderr, "Error: No symbol table found in %s\n", ko_path);
         close_elf(&ko_elf);
         close_elf(&vmlinux);
         return 1;
     }
 
     if (!vmlinux_symtab) {
-        fprintf(stderr, "Error: No symbol table found in %s\n", vmlinux_path);
+        // fprintf(stderr, "Error: No symbol table found in %s\n", vmlinux_path);
         close_elf(&ko_elf);
         close_elf(&vmlinux);
         return 1;
     }
 
     if (!ko_version_sec) {
-        fprintf(stderr, "Error: No __versions section found in %s\n", ko_path);
+        // fprintf(stderr, "Error: No __versions section found in %s\n", ko_path);
         close_elf(&ko_elf);
         close_elf(&vmlinux);
         return 1;
     }
 
     if (ko_version_sec->sh_size != 0) {
-        fprintf(stderr, "Error: __versions section in %s must have size 0 (actual=%llu)\n", ko_path,
-                (unsigned long long)ko_version_sec->sh_size);
+        // fprintf(stderr, "Error: __versions section in %s must have size 0 (actual=%llu)\n", ko_path,
+        //         (unsigned long long)ko_version_sec->sh_size);
         close_elf(&ko_elf);
         close_elf(&vmlinux);
         return 1;
@@ -169,13 +169,13 @@ int main(int argc, char *argv[])
             Elf64_Sym *vmlinux_sym = find_symbol(&vmlinux, sym_name, vmlinux_symtab, vmlinux_strtab);
 
             if (!vmlinux_sym || vmlinux_sym->st_shndx == SHN_UNDEF) {
-                fprintf(stderr, "Error: Symbol '%s' not found or undefined in %s\n", sym_name, vmlinux_path);
+                // fprintf(stderr, "Error: Symbol '%s' not found or undefined in %s\n", sym_name, vmlinux_path);
                 has_error = 1;
             } else {
                 int binding = ELF64_ST_BIND(vmlinux_sym->st_info);
                 if (binding != STB_GLOBAL && binding != STB_WEAK) {
-                    fprintf(stderr, "Warning: Symbol '%s' is defined in %s but not global (binding=%d)\n", sym_name,
-                            vmlinux_path, binding);
+                    // fprintf(stderr, "Warning: Symbol '%s' is defined in %s but not global (binding=%d)\n", sym_name,
+                    //         vmlinux_path, binding);
                 }
             }
         }
