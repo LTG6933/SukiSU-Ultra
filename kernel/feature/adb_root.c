@@ -1,4 +1,3 @@
-
 #include <asm/ptrace.h>
 #include <linux/namei.h>
 #include <linux/path.h>
@@ -32,7 +31,7 @@ static long is_exec_adbd(const char __user *filename_user)
 
     ret = strncpy_from_user(buf, fn, sizeof(buf));
     if (ret < 0) {
-        pr_warn("Access filename when adb_root_handle_execve failed: %ld\n", ret);
+        // pr_warn("Access filename when adb_root_handle_execve failed: %ld\n", ret);
         return ret;
     }
 
@@ -51,10 +50,10 @@ static long is_libadbroot_ok()
     long ret = kern_path(kLibAdbRoot, 0, &path);
     if (ret < 0) {
         if (ret == -ENOENT) {
-            pr_err("libadbroot.so not exists, skip adb root. Please run `ksud install`\n");
+            // pr_err("libadbroot.so not exists, skip adb root. Please run `ksud install`\n");
             ret = 0;
         } else {
-            pr_err("access libadbroot.so failed: %ld, skip adb root\n", ret);
+            // pr_err("access libadbroot.so failed: %ld, skip adb root\n", ret);
         }
         return ret;
     } else {
@@ -81,28 +80,28 @@ static long setup_ld_preload(struct pt_regs *regs, unsigned long *envp_p)
     ld_preload_p = stackp = ALIGN_DOWN(stackp - sizeof(kLdPreload), 8);
     ret = copy_to_user(ld_preload_p, kLdPreload, sizeof(kLdPreload));
     if (ret != 0) {
-        pr_warn("write ld_preload when adb_root_handle_execve failed: %ld\n", ret);
+        // pr_warn("write ld_preload when adb_root_handle_execve failed: %ld\n", ret);
         return -EFAULT;
     }
 
     ld_library_path_p = stackp = ALIGN_DOWN(stackp - sizeof(kLdLibraryPath), 8);
     ret = copy_to_user(ld_library_path_p, kLdLibraryPath, sizeof(kLdLibraryPath));
     if (ret != 0) {
-        pr_warn("write ld_library_path when adb_root_handle_execve failed: %ld\n", ret);
+        // pr_warn("write ld_library_path when adb_root_handle_execve failed: %ld\n", ret);
         return -EFAULT;
     }
 
     for (;;) {
         tmp_env_p2 = krealloc(tmp_env_p, (env_count + kReadEnvBatch + 2) * kPtrSize, GFP_KERNEL);
         if (tmp_env_p2 == NULL) {
-            pr_err("alloc tmp env failed\n");
+            // pr_err("alloc tmp env failed\n");
             ret = -ENOMEM;
             goto out_release_env_p;
         }
         tmp_env_p = tmp_env_p2;
         ret = copy_from_user(&tmp_env_p[env_count], envp + env_count * kPtrSize, kReadEnvBatch * kPtrSize);
         if (ret < 0) {
-            pr_warn("Access envp when adb_root_handle_execve failed: %ld\n", ret);
+            // pr_warn("Access envp when adb_root_handle_execve failed: %ld\n", ret);
             ret = -EFAULT;
             goto out_release_env_p;
         }
@@ -117,11 +116,11 @@ static long setup_ld_preload(struct pt_regs *regs, unsigned long *envp_p)
         }
         if (!meet_zero) {
             if (read_count % kPtrSize != 0) {
-                pr_err("unaligned envp array!\n");
+                // pr_err("unaligned envp array!\n");
                 ret = -EFAULT;
                 goto out_release_env_p;
             } else if (ret != 0) {
-                pr_err("truncated envp array!\n");
+                // pr_err("truncated envp array!\n");
                 ret = -EFAULT;
                 goto out_release_env_p;
             }
@@ -141,7 +140,7 @@ static long setup_ld_preload(struct pt_regs *regs, unsigned long *envp_p)
     stackp -= total_size;
     ret = copy_to_user(stackp, tmp_env_p, total_size);
     if (ret != 0) {
-        pr_err("copy new env failed: %ld\n", ret);
+        // pr_err("copy new env failed: %ld\n", ret);
         ret = -EFAULT;
         goto out_release_env_p;
     }
@@ -172,7 +171,7 @@ static long do_ksu_adb_root_handle_execve(const char __user *filename_user, stru
         return ret;
     }
 
-    pr_info("escape to root for adb\n");
+    // pr_info("escape to root for adb\n");
     escape_to_root_for_adb_root();
     return 0;
 }
@@ -209,7 +208,7 @@ static int kernel_adb_root_feature_set(u64 value)
     } else {
         static_key_disable(&ksu_adb_root.key);
     }
-    pr_info("adb_root: set to %d\n", enable);
+    // pr_info("adb_root: set to %d\n", enable);
     return 0;
 }
 
@@ -223,7 +222,7 @@ static const struct ksu_feature_handler ksu_adb_root_handler = {
 void __init ksu_adb_root_init(void)
 {
     if (ksu_register_feature_handler(&ksu_adb_root_handler)) {
-        pr_err("Failed to register adb_root feature handler\n");
+        // pr_err("Failed to register adb_root feature handler\n");
     }
 }
 
