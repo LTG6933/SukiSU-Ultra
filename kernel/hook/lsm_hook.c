@@ -40,7 +40,7 @@ static int ksu_lsm_hook_track(struct ksu_lsm_hook *hook)
         return 0;
 
     if (ksu_lsm_hook_count >= ARRAY_SIZE(ksu_lsm_hook_entries)) {
-        pr_err("lsm_hook: tracking table full, cannot record %s\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: tracking table full, cannot record %s\n", hook->head_name ?: "unknown");
         return -ENOSPC;
     }
 
@@ -120,7 +120,7 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
 
     target_name = hook->target_name;
     if (!target_name) {
-        pr_err("lsm_hook: hook %s: target_name is required\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: hook %s: target_name is required\n", hook->head_name ?: "unknown");
         ret = -EINVAL;
         goto out_unlock;
     }
@@ -129,18 +129,18 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
     if (!target)
         target = ksu_resolve_symbol_for_functable_hook(target_name);
     if (!target) {
-        pr_err("lsm_hook: failed to resolve target for %s\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: failed to resolve target for %s\n", hook->head_name ?: "unknown");
         ret = -ENOENT;
         goto out_unlock;
     }
-    pr_info("target: 0x%lx %pSb\n", (unsigned long)target, target);
+    // pr_info("target: 0x%lx %pSb\n", (unsigned long)target, target);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
     if (!scalls_addr) {
         scalls_addr = find_kernel_symbol_exact("static_calls_table");
     }
     if (!scalls_addr) {
-        pr_err("lsm_hook: failed to resolve static_calls_table\n");
+        // pr_err("lsm_hook: failed to resolve static_calls_table\n");
         ret = -ENOSYS;
         goto out_unlock;
     }
@@ -149,29 +149,29 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
         unsigned long sym_size = sizeof(struct lsm_static_calls_table);
         u32 lsm_active_cnt = 5;
         if (!kallsyms_lookup_size_offset(scalls_addr, &sym_size, NULL)) {
-            pr_err("failed to get size\n");
+            // pr_err("failed to get size\n");
         }
         unsigned long addr = find_kernel_symbol_exact("lsm_active_cnt");
         if (!addr) {
-            pr_err("failed to get lsm_active_cnt\n");
+            // pr_err("failed to get lsm_active_cnt\n");
         } else {
             lsm_active_cnt = *(u32 *)addr;
         }
-        pr_info("lsm_active_cnt = %d\n", lsm_active_cnt);
+        // pr_info("lsm_active_cnt = %d\n", lsm_active_cnt);
         if (lsm_active_cnt == 0 || lsm_active_cnt > 20) {
-            pr_err("invalid lsm_active_cnt\n");
+            // pr_err("invalid lsm_active_cnt\n");
         } else {
             lsm_max_cnt = lsm_active_cnt;
             if (sym_size % (lsm_active_cnt * sizeof(struct lsm_static_call)) != 0) {
-                pr_warn("invalid struct size\n");
+                // pr_warn("invalid struct size\n");
             }
             scalls_count = sym_size / sizeof(struct lsm_static_call);
-            pr_info("scalls_count = %zu\n", scalls_count);
+            // pr_info("scalls_count = %zu\n", scalls_count);
         }
     }
 
     if (scalls_count == 0) {
-        pr_err("no scalls_count found!\n");
+        // pr_err("no scalls_count found!\n");
         ret = -ENOSYS;
         goto out_unlock;
     }
@@ -206,7 +206,7 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
             continue;
         }
 
-        pr_info("found slot %ld orig %pSb\n", i, current_origin);
+        // pr_info("found slot %ld orig %pSb\n", i, current_origin);
 
         if (!hook->offset) {
             selected_entry = entry;
@@ -216,7 +216,7 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
         } else {
             size_t hook_idx = (i / lsm_max_cnt + hook->offset) * lsm_max_cnt;
             if (hook_idx >= scalls_count) {
-                pr_err("last lsm hook reached\n");
+                // pr_err("last lsm hook reached\n");
                 ret = -EINVAL;
                 goto out_unlock;
             }
@@ -228,7 +228,7 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
             } else {
                 current_origin = NULL;
             }
-            pr_info("found real slot %ld orig %pSb\n", i, current_origin);
+            // pr_info("found real slot %ld orig %pSb\n", i, current_origin);
 
             if (current_origin == hook->replacement) {
                 ret = -EALREADY;
@@ -243,26 +243,26 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
     }
 
     if (!selected_scall) {
-        pr_err("lsm_hook: target %s not found in head %s\n", target_name, hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: target %s not found in head %s\n", target_name, hook->head_name ?: "unknown");
         ret = -ENOENT;
         goto out_unlock;
     }
 
     ret = ksu_lsm_hook_track(hook);
     if (ret) {
-        pr_err("lsm_hook: too many hooks to track: %d\n", ret);
+        // pr_err("lsm_hook: too many hooks to track: %d\n", ret);
         goto out_unlock;
     }
 
     if (ksu_lsm_hook_patch_slot(selected_slot, hook->replacement)) {
-        pr_err("lsm_hook: failed to patch %s\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: failed to patch %s\n", hook->head_name ?: "unknown");
         ret = -EFAULT;
         goto out_untrack;
     }
 
     if (ksu_lsm_hook_update_scall(selected_scall, hook->replacement)) {
         if (ksu_lsm_hook_patch_slot(selected_slot, selected_origin)) {
-            pr_err("lsm_hook: failed to roll back %s after static call update failure\n", hook->head_name ?: "unknown");
+            // pr_err("lsm_hook: failed to roll back %s after static call update failure\n", hook->head_name ?: "unknown");
         }
         ret = -EFAULT;
         goto out_untrack;
@@ -274,24 +274,24 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
     hook->entry = selected_entry;
     hook->scall = selected_scall;
     hook->original = selected_origin;
-    pr_info("lsm_hook: patched %s hook slot %px from %px to %px\n", hook->head_name ?: "unknown", selected_slot,
-            selected_origin, hook->replacement);
+    // pr_info("lsm_hook: patched %s hook slot %px from %px to %px\n", hook->head_name ?: "unknown", selected_slot,
+    //         selected_origin, hook->replacement);
 #else
     heads_addr = find_kernel_symbol_exact("security_hook_heads");
     if (!heads_addr) {
-        pr_err("lsm_hook: failed to resolve security_hook_heads\n");
+        // pr_err("lsm_hook: failed to resolve security_hook_heads\n");
         ret = -ENOENT;
         goto out_unlock;
     }
     unsigned long heads_size = sizeof(struct security_hook_heads);
     if (!kallsyms_lookup_size_offset(heads_addr, &heads_size, NULL)) {
-        pr_warn("lookup head size failed");
+        // pr_warn("lookup head size failed");
     }
 
     head = (struct hlist_head *)heads_addr;
     struct hlist_head *head_end = (struct hlist_head *)(heads_addr + heads_size);
-    pr_info("heads_addr 0x%lx head_offset 0x%lx heads_size %ld hook_offset 0x%lx\n", (unsigned long)heads_addr,
-            hook->head_offset, heads_size, hook->hook_offset);
+    // pr_info("heads_addr 0x%lx head_offset 0x%lx heads_size %ld hook_offset 0x%lx\n", (unsigned long)heads_addr,
+    //         hook->head_offset, heads_size, hook->hook_offset);
 
     for (; head < head_end; head++) {
         hlist_for_each_entry (entry, head, list) {
@@ -309,8 +309,8 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
                 goto out_unlock;
             }
             if (current_origin == target) {
-                pr_info("found %s (target %s) at head offset %ld (provided %ld)\n", hook->head_name, hook->target_name,
-                        (unsigned long)head - heads_addr, hook->head_offset);
+                // pr_info("found %s (target %s) at head offset %ld (provided %ld)\n", hook->head_name, hook->target_name,
+                //         (unsigned long)head - heads_addr, hook->head_offset);
                 selected_entry = entry;
                 selected_slot = slot;
                 selected_origin = current_origin;
@@ -321,7 +321,7 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
             if (hook->offset) {
                 head += hook->offset;
                 if (head < (struct hlist_head *)heads_addr || head >= head_end) {
-                    pr_err("invalid offset\n");
+                    // pr_err("invalid offset\n");
                     ret = -EINVAL;
                     goto out_unlock;
                 }
@@ -354,35 +354,35 @@ int ksu_lsm_hook(struct ksu_lsm_hook *hook)
     }
 
     if (!selected_entry) {
-        pr_err("lsm_hook: target %s not found in head %s\n", target_name, hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: target %s not found in head %s\n", target_name, hook->head_name ?: "unknown");
         ret = -ENOENT;
         goto out_unlock;
     }
 
     ret = ksu_lsm_hook_track(hook);
     if (ret) {
-        pr_err("lsm_hook: too many hooks to track: %d\n", ret);
+        // pr_err("lsm_hook: too many hooks to track: %d\n", ret);
         goto out_unlock;
     }
 
     if (selected_origin) {
-        pr_info("patch func addr\n");
+        // pr_info("patch func addr\n");
         ret = ksu_lsm_hook_patch_slot(selected_slot, hook->replacement);
     } else {
-        pr_info("patch head->first\n");
+        // pr_info("patch head->first\n");
         ret = ksu_lsm_hook_patch_slot(selected_slot, &hook->list);
     }
 
     if (ret) {
-        pr_err("lsm_hook: failed to patch %s\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: failed to patch %s\n", hook->head_name ?: "unknown");
         ret = -EFAULT;
         goto out_untrack;
     }
 
     hook->entry = selected_entry;
     hook->original = selected_origin;
-    pr_info("lsm_hook: patched %s hook slot %px from %px to %px\n", hook->head_name ?: "unknown", selected_slot,
-            selected_origin, hook->replacement);
+    // pr_info("lsm_hook: patched %s hook slot %px from %px to %px\n", hook->head_name ?: "unknown", selected_slot,
+    //         selected_origin, hook->replacement);
 #endif
     goto out_unlock;
 out_untrack:
@@ -412,14 +412,14 @@ void ksu_lsm_unhook(struct ksu_lsm_hook *hook)
 #else
     if (hook->entry == &hook->list) {
         slot = (void **)&hook->list.head->first;
-        pr_info("unhook patch head->first\n");
+        // pr_info("unhook patch head->first\n");
     } else {
         slot = (void **)((char *)hook->entry + hook->hook_offset);
-        pr_info("unhook patch slot\n");
+        // pr_info("unhook patch slot\n");
     }
 #endif
     if (ksu_lsm_hook_patch_slot(slot, hook->original)) {
-        pr_err("lsm_hook: failed to restore %s\n", hook->head_name ?: "unknown");
+        // pr_err("lsm_hook: failed to restore %s\n", hook->head_name ?: "unknown");
         mutex_unlock(&ksu_lsm_hook_lock);
         return;
     }
@@ -427,14 +427,14 @@ void ksu_lsm_unhook(struct ksu_lsm_hook *hook)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
     if (ksu_lsm_hook_update_scall(hook->scall, hook->original)) {
         if (ksu_lsm_hook_patch_slot(slot, hook->replacement))
-            pr_err("lsm_hook: failed to reapply %s after static call restore failure\n", hook->head_name ?: "unknown");
+            // pr_err("lsm_hook: failed to reapply %s after static call restore failure\n", hook->head_name ?: "unknown");
         mutex_unlock(&ksu_lsm_hook_lock);
         return;
     }
 #endif
 
     synchronize_rcu();
-    pr_info("lsm_hook: restored %s hook slot %px to %px\n", hook->head_name ?: "unknown", slot, hook->original);
+    // pr_info("lsm_hook: restored %s hook slot %px to %px\n", hook->head_name ?: "unknown", slot, hook->original);
     ksu_lsm_hook_untrack(hook);
     hook->entry = NULL;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
@@ -455,7 +455,7 @@ void ksu_unregister_lsm_hook(struct ksu_lsm_hook *hook)
 
 void __init ksu_lsm_hook_init(void)
 {
-    pr_info("lsm_hook: init, tracked hooks=%d\n", READ_ONCE(ksu_lsm_hook_count));
+    // pr_info("lsm_hook: init, tracked hooks=%d\n", READ_ONCE(ksu_lsm_hook_count));
 }
 
 void __exit ksu_lsm_hook_exit(void)
