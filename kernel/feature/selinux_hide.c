@@ -104,9 +104,9 @@ static ssize_t my_write_context(struct file *file, char *buf, size_t size)
 
     length = -ERANGE;
     if (len > SIMPLE_TRANSACTION_LIMIT) {
-        pr_err("SELinux: %s:  context size (%u) exceeds "
-               "payload max\n",
-               __func__, len);
+        // pr_err("SELinux: %s:  context size (%u) exceeds "
+        //        "payload max\n",
+        //        __func__, len);
         goto out;
     }
 #else
@@ -253,19 +253,19 @@ static void initialize_fake_status()
     if (fake_status)
         goto out;
     if (!selinux_state.status_page) {
-        pr_warn("initialize_fake_status: status_page not exist\n");
+        // pr_warn("initialize_fake_status: status_page not exist\n");
         goto out;
     }
 
     struct selinux_kernel_status *status = page_address(selinux_state.status_page);
     if (!status->enforcing && !ksu_late_loaded) {
-        pr_warn("initialize_fake_status: skip not enforcing\n");
+        // pr_warn("initialize_fake_status: skip not enforcing\n");
         goto out;
     }
 
     struct page *new_page = alloc_page(GFP_KERNEL | __GFP_ZERO);
     if (!new_page) {
-        pr_err("initialize_fake_status: failed to allocate page\n");
+        // pr_err("initialize_fake_status: failed to allocate page\n");
         goto out;
     }
 
@@ -289,8 +289,8 @@ static void initialize_fake_status()
     }
 
     fake_status = new_page;
-    pr_info("initialize_fake_status initialized: sequence=%d, policyload=%d, enforcing=%d\n", new_status->sequence,
-            new_status->policyload, new_status->enforcing);
+    // pr_info("initialize_fake_status initialized: sequence=%d, policyload=%d, enforcing=%d\n", new_status->sequence,
+    //         new_status->policyload, new_status->enforcing);
 
 out:
     mutex_unlock(&selinux_state.status_lock);
@@ -323,14 +323,14 @@ static void ksu_selinux_hide_unhook();
 static int ksu_selinux_hide_enable()
 {
     int ret;
-    pr_info("selinux_hide: init selinux hide\n");
+    // pr_info("selinux_hide: init selinux hide\n");
     if (!backup_sepolicy) {
-        pr_err("no backup sepolicy available, please save feature and reboot to retry!\n");
+        // pr_err("no backup sepolicy available, please save feature and reboot to retry!\n");
         return -EAGAIN;
     }
     selinux_write_op = find_kernel_symbol_exact("write_op");
     if (!selinux_write_op) {
-        pr_err("selinux_hide: no write_op found!\n");
+        // pr_err("selinux_hide: no write_op found!\n");
         return -ENOSYS;
     }
     hook_selinux_status_open();
@@ -338,11 +338,11 @@ static int ksu_selinux_hide_enable()
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
     security_dump_masked_av_fn = find_kernel_symbol_exact("security_dump_masked_av");
     if (!security_dump_masked_av_fn) {
-        pr_warn("security_dump_masked_av not found!\n");
+        // pr_warn("security_dump_masked_av not found!\n");
     }
     context_struct_compute_av_fn = find_kernel_symbol_exact("context_struct_compute_av");
     if (!context_struct_compute_av_fn) {
-        pr_warn("context_struct_compute_av not found!\n");
+        // pr_warn("context_struct_compute_av not found!\n");
     }
 #else
     fake_state.initialized = true;
@@ -350,28 +350,28 @@ static int ksu_selinux_hide_enable()
 #endif
 
     context_write = &selinux_write_op[SEL_CONTEXT];
-    pr_info("selinux_hide: context_write: 0x%lx [%pSb]\n", (unsigned long)*context_write, *context_write);
+    // pr_info("selinux_hide: context_write: 0x%lx [%pSb]\n", (unsigned long)*context_write, *context_write);
     write_op_fn my = my_write_context;
     orig_context_write = *context_write;
     ret = ksu_patch_text(context_write, &my, sizeof(my), KSU_PATCH_TEXT_FLUSH_DCACHE);
     if (ret) {
-        pr_err("selinux_hide: init: patch_text context_write err: %d\n", ret);
+        // pr_err("selinux_hide: init: patch_text context_write err: %d\n", ret);
         goto unhook;
     }
 
     access_write = &selinux_write_op[SEL_ACCESS];
-    pr_info("selinux_hide: access_write: 0x%lx [%pSb]\n", (unsigned long)*access_write, *access_write);
+    // pr_info("selinux_hide: access_write: 0x%lx [%pSb]\n", (unsigned long)*access_write, *access_write);
     my = my_write_access;
     orig_access_write = *access_write;
     ret = ksu_patch_text(access_write, &my, sizeof(my), KSU_PATCH_TEXT_FLUSH_DCACHE);
     if (ret) {
-        pr_err("selinux_hide: init: patch_text access_write err: %d\n", ret);
+        // pr_err("selinux_hide: init: patch_text access_write err: %d\n", ret);
         goto unhook;
     }
 
     ret = ksu_lsm_hook(&selinux_setprocattr_hook);
     if (ret) {
-        pr_err("selinux_hide: init: selinux_setprocattr_hook err: %d\n", ret);
+        // pr_err("selinux_hide: init: selinux_setprocattr_hook err: %d\n", ret);
         goto unhook;
     }
 
@@ -390,14 +390,14 @@ static void ksu_selinux_hide_unhook()
             ksu_patch_text(context_write, &orig_context_write, sizeof(orig_context_write), KSU_PATCH_TEXT_FLUSH_DCACHE);
         orig_context_write = NULL;
         if (ret) {
-            pr_err("selinux_hide: exit: patch_text context_write err: %d\n", ret);
+            // pr_err("selinux_hide: exit: patch_text context_write err: %d\n", ret);
         }
     }
     if (orig_access_write) {
         ret = ksu_patch_text(access_write, &orig_access_write, sizeof(orig_access_write), KSU_PATCH_TEXT_FLUSH_DCACHE);
         orig_access_write = NULL;
         if (ret) {
-            pr_err("selinux_hide: exit: patch_text access_write err: %d\n", ret);
+            // pr_err("selinux_hide: exit: patch_text access_write err: %d\n", ret);
         }
     }
     if (sel_open_handle_status_slot && orig_sel_open_handle_status) {
@@ -405,7 +405,7 @@ static void ksu_selinux_hide_unhook()
                              sizeof(orig_sel_open_handle_status), KSU_PATCH_TEXT_FLUSH_DCACHE);
         orig_sel_open_handle_status = NULL;
         if (ret) {
-            pr_err("selinux_hide: exit: patch_text sel_open_handle_status err: %d\n", ret);
+            // pr_err("selinux_hide: exit: patch_text sel_open_handle_status err: %d\n", ret);
         }
     }
     ksu_lsm_unhook(&selinux_setprocattr_hook);
@@ -413,7 +413,7 @@ static void ksu_selinux_hide_unhook()
 
 static void ksu_selinux_hide_disable()
 {
-    pr_info("selinux_hide: exit selinux hide\n");
+    // pr_info("selinux_hide: exit selinux hide\n");
     ksu_selinux_hide_unhook();
 }
 
@@ -427,7 +427,7 @@ static int selinux_hide_feature_set(u64 value)
 {
     bool enable = value != 0;
     int ret = 0;
-    pr_info("selinux_hide: set to %d\n", enable);
+    // pr_info("selinux_hide: set to %d\n", enable);
     mutex_lock(&selinux_hide_mutex);
     ksu_selinux_hide_enabled = enable;
     if (enable) {
@@ -461,7 +461,7 @@ void ksu_selinux_hide_handle_second_stage()
     if (fake_status) {
         static_key_disable(&fake_status_initialize_key.key);
     } else {
-        pr_warn("selinux_hide: fake status need late initialization\n");
+        // pr_warn("selinux_hide: fake status need late initialization\n");
     }
 }
 
@@ -469,7 +469,7 @@ void ksu_selinux_hide_handle_post_fs_data()
 {
     static_key_disable(&fake_status_initialize_key.key);
     if (!fake_status) {
-        pr_err("selinux_hide: fake status is not initialized after post-fs-data!\n");
+        // pr_err("selinux_hide: fake status is not initialized after post-fs-data!\n");
     }
 }
 
@@ -480,7 +480,7 @@ static void hook_selinux_status_open()
     if (!sel_open_handle_status_slot) {
         struct file_operations *ops = find_kernel_symbol_exact("sel_handle_status_ops");
         if (!ops) {
-            pr_err("selinux_hide: sel_handle_status_ops not found, fake status will not work\n");
+            // pr_err("selinux_hide: sel_handle_status_ops not found, fake status will not work\n");
             return;
         }
         sel_open_handle_status_slot = &ops->open;
@@ -489,7 +489,7 @@ static void hook_selinux_status_open()
     orig_sel_open_handle_status = *sel_open_handle_status_slot;
     int ret = ksu_patch_text(sel_open_handle_status_slot, &new_fn, sizeof(new_fn), KSU_PATCH_TEXT_FLUSH_DCACHE);
     if (ret) {
-        pr_err("selinux_hide: init: patch_text sel_open_handle_status err: %d\n", ret);
+        // pr_err("selinux_hide: init: patch_text sel_open_handle_status err: %d\n", ret);
         sel_open_handle_status_slot = NULL;
         orig_sel_open_handle_status = NULL;
     }
@@ -498,7 +498,7 @@ static void hook_selinux_status_open()
 void __init ksu_selinux_hide_init()
 {
     if (ksu_register_feature_handler(&selinux_hide_handler)) {
-        pr_err("Failed to register selinux_hide feature handler\n");
+        // pr_err("Failed to register selinux_hide feature handler\n");
     }
     if (ksu_late_loaded) {
         initialize_fake_status();
@@ -528,7 +528,7 @@ void ksu_selinux_hide_drop_backup_if_unused()
 {
     mutex_lock(&selinux_hide_mutex);
     if (!ksu_selinux_hide_running && backup_sepolicy) {
-        pr_info("selinux_hide is not enabled - drop backup_sepolicy\n");
+        // pr_info("selinux_hide is not enabled - drop backup_sepolicy\n");
         sidtab_destroy(backup_sepolicy->sidtab);
         kfree(backup_sepolicy->sidtab);
         ksu_destroy_sepolicy(backup_sepolicy);
@@ -743,7 +743,7 @@ static int security_sid_to_context_with_policy(struct selinux_policy *policy, u3
     // removed: force
     entry = sidtab_search_entry(sidtab, sid);
     if (!entry) {
-        pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, sid);
+        // pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, sid);
         rc = -EINVAL;
         goto out_unlock;
     }
@@ -1023,7 +1023,7 @@ static void context_struct_compute_av(struct policydb *policydb, struct context 
     }
 
     if (unlikely(!tclass || tclass > policydb->p_classes.nprim)) {
-        pr_warn_ratelimited("SELinux:  Invalid class %u\n", tclass);
+        // pr_warn_ratelimited("SELinux:  Invalid class %u\n", tclass);
         return;
     }
 
@@ -1112,7 +1112,7 @@ static void __nocfi security_compute_av_user_with_policy(struct selinux_policy *
 
     scontext = sidtab_search(sidtab, ssid);
     if (!scontext) {
-        pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, ssid);
+        // pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, ssid);
         goto out;
     }
 
@@ -1122,7 +1122,7 @@ static void __nocfi security_compute_av_user_with_policy(struct selinux_policy *
 
     tcontext = sidtab_search(sidtab, tsid);
     if (!tcontext) {
-        pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, tsid);
+        // pr_err("SELinux: %s:  unrecognized SID %d\n", __func__, tsid);
         goto out;
     }
 
