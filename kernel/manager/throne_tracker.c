@@ -26,18 +26,18 @@ static void crown_manager(const char *apk, struct list_head *uid_data)
 {
     char pkg[KSU_MAX_PACKAGE_NAME];
     if (get_pkg_from_apk_path(pkg, apk) < 0) {
-        pr_err("Failed to get package name from apk path: %s\n", apk);
+        // pr_err("Failed to get package name from apk path: %s\n", apk);
         return;
     }
 
-    pr_info("manager pkg: %s\n", pkg);
+    // pr_info("manager pkg: %s\n", pkg);
 
     struct list_head *list = (struct list_head *)uid_data;
     struct uid_data *np;
 
     list_for_each_entry (np, list, list) {
         if (strncmp(np->package, pkg, KSU_MAX_PACKAGE_NAME) == 0) {
-            pr_info("Crowning manager: %s(uid=%d)\n", pkg, np->uid);
+            // pr_info("Crowning manager: %s(uid=%d)\n", pkg, np->uid);
             ksu_set_manager_appid(np->uid);
             break;
         }
@@ -87,11 +87,11 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
     char dirpath[DATA_PATH_LEN];
 
     if (!my_ctx) {
-        pr_err("Invalid context\n");
+        // pr_err("Invalid context\n");
         return FILLDIR_ACTOR_STOP;
     }
     if (my_ctx->stop && *my_ctx->stop) {
-        pr_info("Stop searching\n");
+        // pr_info("Stop searching\n");
         return FILLDIR_ACTOR_STOP;
     }
 
@@ -99,12 +99,12 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
         return FILLDIR_ACTOR_CONTINUE; // Skip "." and ".."
 
     if (d_type == DT_DIR && namelen >= 8 && !strncmp(name, "vmdl", 4) && !strncmp(name + namelen - 4, ".tmp", 4)) {
-        pr_info("Skipping directory: %.*s\n", namelen, name);
+        // pr_info("Skipping directory: %.*s\n", namelen, name);
         return FILLDIR_ACTOR_CONTINUE; // Skip staging package
     }
 
     if (snprintf(dirpath, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir, namelen, name) >= DATA_PATH_LEN) {
-        pr_err("Path too long: %s/%.*s\n", my_ctx->parent_dir, namelen, name);
+        // pr_err("Path too long: %s/%.*s\n", my_ctx->parent_dir, namelen, name);
         return FILLDIR_ACTOR_CONTINUE;
     }
 
@@ -112,7 +112,7 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
         struct data_path *data = kzalloc(sizeof(struct data_path), GFP_KERNEL);
 
         if (!data) {
-            pr_err("Failed to allocate memory for %s\n", dirpath);
+            // pr_err("Failed to allocate memory for %s\n", dirpath);
             return FILLDIR_ACTOR_CONTINUE;
         }
 
@@ -131,7 +131,7 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
             }
 
             bool is_manager = is_manager_apk(dirpath);
-            pr_info("Found new base.apk at path: %s, is_manager: %d\n", dirpath, is_manager);
+            // pr_info("Found new base.apk at path: %s, is_manager: %d\n", dirpath, is_manager);
             if (is_manager) {
                 crown_manager(dirpath, my_ctx->private_data);
                 *my_ctx->stop = 1;
@@ -144,7 +144,7 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
             } else {
                 struct apk_path_hash *apk_data = kzalloc(sizeof(struct apk_path_hash), GFP_KERNEL);
                 if (!apk_data) {
-                    pr_err("Failed to allocate apk_path_hash for %s\n", dirpath);
+                    // pr_err("Failed to allocate apk_path_hash for %s\n", dirpath);
                     return FILLDIR_ACTOR_CONTINUE;
                 }
                 apk_data->hash = hash;
@@ -191,7 +191,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
             if (!stop) {
                 file = filp_open(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
                 if (IS_ERR(file)) {
-                    pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath, PTR_ERR(file));
+                    // pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath, PTR_ERR(file));
                     goto skip_iterate;
                 }
 
@@ -199,7 +199,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 if (!data_app_magic) {
                     if (file->f_inode->i_sb->s_magic) {
                         data_app_magic = file->f_inode->i_sb->s_magic;
-                        pr_info("%s: dir: %s got magic! 0x%lx\n", __func__, pos->dirpath, data_app_magic);
+                        // pr_info("%s: dir: %s got magic! 0x%lx\n", __func__, pos->dirpath, data_app_magic);
                     } else {
                         filp_close(file, NULL);
                         goto skip_iterate;
@@ -207,8 +207,8 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 }
 
                 if (file->f_inode->i_sb->s_magic != data_app_magic) {
-                    pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__, pos->dirpath,
-                            file->f_inode->i_sb->s_magic, data_app_magic);
+                    // pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__, pos->dirpath,
+                    //         file->f_inode->i_sb->s_magic, data_app_magic);
                     filp_close(file, NULL);
                     goto skip_iterate;
                 }
@@ -251,7 +251,7 @@ void track_throne(bool prune_only)
 {
     struct file *fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
     if (IS_ERR(fp)) {
-        pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
+        // pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
         return;
     }
 
@@ -287,14 +287,14 @@ void track_throne(bool prune_only)
         char *uid = strsep(&tmp, delim);
         if (!uid || !package) {
             kfree(data);
-            pr_err("update_uid: package or uid is NULL!\n");
+            // pr_err("update_uid: package or uid is NULL!\n");
             break;
         }
 
         u32 res;
         if (kstrtou32(uid, 10, &res)) {
             kfree(data);
-            pr_err("update_uid: uid parse err\n");
+            // pr_err("update_uid: uid parse err\n");
             break;
         }
         data->uid = res;
@@ -323,13 +323,13 @@ void track_throne(bool prune_only)
 
     if (!manager_exist) {
         if (ksu_is_manager_appid_valid()) {
-            pr_info("manager is uninstalled, invalidate it!\n");
+            // pr_info("manager is uninstalled, invalidate it!\n");
             ksu_invalidate_manager_uid();
             goto prune;
         }
-        pr_info("Searching manager...\n");
+        // pr_info("Searching manager...\n");
         search_manager("/data/app", 2, &uid_list);
-        pr_info("Search manager finished\n");
+        // pr_info("Search manager finished\n");
     }
 
 prune:
